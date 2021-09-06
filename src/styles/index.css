@@ -1,0 +1,7 @@
+.tag {
+  @apply inline-block px-2 py-1 text-base font-light rounded-full bg-gray-6 text-blue-dark;
+}
+
+.rectangle-tag {
+  @apply inline-block border border-gray-4 px-5 py-1.5 text-base font-light rounded-[5px] bg-white text-gray-1;
+}
