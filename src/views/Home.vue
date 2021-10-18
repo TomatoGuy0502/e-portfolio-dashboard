@@ -1,6 +1,6 @@
 <template>
   <div class="container grid h-full max-w-[1190px] grid-cols-12 mx-auto gap-[30px] text-gray-1 px-[40px]">
-    <form class="col-span-4 py-[100px] flex flex-col gap-2 text-gray-2" @submit.prevent="handleAnalyze">
+    <form class="col-span-4 py-[80px] flex flex-col gap-2 text-gray-2" @submit.prevent="handleAnalyze">
       <h1 class="text-xl text-gray-1">習得能力</h1>
       <p class="text-base">分析成大生最常使用的能力 TAG</p>
       <div>
@@ -21,7 +21,9 @@
         </select>
       </div>
       <div>
-        <h2 class="text-lg">學習類別<span class="ml-2 text-sm text-red-light">{{ formError.categories }}</span></h2>
+        <h2 class="text-lg">
+          學習類別<span class="ml-2 text-sm text-red-light">{{ formError.categories }}</span>
+        </h2>
         <p class="text-sm font-light">*請至少選擇一個類別</p>
       </div>
       <div class="flex flex-wrap gap-x-[25px] gap-y-2">
@@ -31,7 +33,6 @@
             type="checkbox"
             v-model="formData.categories"
             :value="type"
-            :name="experienceTypes"
           />
           <span>{{ chinese }}</span>
         </label>
@@ -45,17 +46,19 @@
         </button>
       </div>
     </form>
-    <div class="col-start-6 col-end-13 pt-[100px] flex flex-col gap-y-[25px]">
+    <div class="col-start-6 col-end-13 py-[80px] flex flex-col gap-y-[25px] overflow-auto custom-scrollbar">
       <div class="bg-white rounded-[10px] p-2.5 flex flex-col gap-y-2.5 items-center">
         <div class="p-2.5 flex gap-x-2.5 items-center">
           <h2 class="text-lg">分析結果_參與類型性質</h2>
           <DocumentDownloadIcon class="w-[28px] h-[28px]" />
         </div>
         <div class="flex flex-wrap gap-x-[10px]">
-          <div class="tag" v-for="department in analysisResult.departments" :key="department">{{ department.text || department }}</div>
+          <div class="tag" v-for="department in analysisResult.departments" :key="department">
+            {{ department }}
+          </div>
         </div>
-        <div class="w-[480px] h-[330px] bg-gray-4 overflow-auto">
-          <ul class="overflow-auto">
+        <div class="w-[480px] h-[330px] bg-gray-4 overflow-auto custom-scrollbar">
+          <ul>
             <li v-for="exp in analysisResult.experiences" :key="exp.name">{{ exp.name }} - {{ exp.count }}</li>
           </ul>
         </div>
@@ -68,16 +71,14 @@
       <div class="flex flex-col gap-y-[10px]">
         <h2>透過TAG來了解學生們所建立的Portfolio</h2>
         <div class="flex flex-col gap-y-[5px]">
-          <h3>學生最常使用之 TOP3</h3>
-          <ul class="flex gap-x-[25px] gap-y-[10px] flex-wrap">
-            <li class="rectangle-tag" v-for="tag in analysisResult.mostUsedTags.slice(0, 3)" :key="tag">{{tag.name}}｜{{tag.count}}</li>
-          </ul>
-        </div>
-        <div class="flex flex-col gap-y-[5px]">
-          <h3>學生們也使用了這些 TAG</h3>
-          <ul class="flex gap-x-[25px] gap-y-[10px] flex-wrap">
-            <li class="rectangle-tag" v-for="tag in analysisResult.mostUsedTags.slice(3)" :key="tag">{{tag.name}}｜{{tag.count}}</li>
-          </ul>
+          <h3>學生最常使用之 TAG</h3>
+          <div class="overflow-auto">
+            <ul class="flex gap-x-[25px] gap-y-[10px] flex-wrap">
+              <li class="rectangle-tag" v-for="tag in analysisResult.mostUsedTags" :key="tag.name">
+                {{ tag.name }}｜{{ tag.percentage }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -99,11 +100,24 @@ import { analyze } from '@/api/analyze'
 
 const experienceTypes = {
   course: '課程紀錄',
-  experience: '活動經驗',
+  activity: '活動經驗',
   competition: '競賽經驗',
   work: '工作經驗',
-  certification: '外語能力或證照',
+  certificate: '外語能力或證照',
   other: '其他'
+}
+
+interface AnalyzeInfo {
+  name: string
+  count: number
+}
+interface AnalyzeInfoWithPercentage extends AnalyzeInfo {
+  percentage: string
+}
+
+interface AnalyzeResponse {
+  experiences: AnalyzeInfo[],
+  tags: AnalyzeInfo[],
 }
 
 export default defineComponent({
@@ -127,19 +141,19 @@ export default defineComponent({
         bachelor: [] as string[],
         master: [] as string[]
       },
-      departments: [] as {text: string, value: string}[],
+      departments: [] as { text: string; value: string }[],
       categories: [] as ExperienceTypes[]
     })
     const formError = reactive({
-      departments: null,
-      categories: null
+      departments: null as null | String,
+      categories: null as null | String
     })
 
     // ===== 更新系所資料 =====
     const handleUpdateColleges = (payload: { bachelor: string[]; master: string[] }) => {
       formData.colleges = payload
     }
-    const handleUpdateDepartments = (payload: {text: string, value: string}[]) => {
+    const handleUpdateDepartments = (payload: { text: string; value: string }[]) => {
       formData.departments = payload
     }
     const totalSelectedNumber = computed(() => {
@@ -163,12 +177,12 @@ export default defineComponent({
 
     // ===== 表單送出 =====
     const analysisResult = reactive({
-      experiences: [],
-      mostUsedTags: [],
-      departments: [],
+      experiences: [] as AnalyzeInfo[],
+      mostUsedTags: [] as AnalyzeInfoWithPercentage[],
+      departments: [] as string[],
       totalCount: 0,
       enrollYear: '110',
-      categories: []
+      categories: [] as ExperienceTypes[]
     })
     const handleAnalyze = async () => {
       if (!formData.colleges.bachelor.length && !formData.colleges.master.length && !formData.departments.length) {
@@ -179,15 +193,19 @@ export default defineComponent({
       }
       if (formError.departments || formError.categories) return
 
-      const { data } = await analyze({
+      const { data }: { data: AnalyzeResponse } = await analyze({
         ...formData,
         departments: formData.departments.map(dept => dept.value)
       })
       console.log(data)
       analysisResult.experiences = data.experiences
-      analysisResult.mostUsedTags = data.tags.slice(0, 8)
+      analysisResult.mostUsedTags = calculatePercentage(data.tags)
       analysisResult.totalCount = data.experiences.length
-      analysisResult.departments = [...formData.colleges.bachelor, ...formData.colleges.master, ...formData.departments]
+      analysisResult.departments = [
+        ...formData.colleges.bachelor,
+        ...formData.colleges.master,
+        ...formData.departments.map(department => department.text)
+      ]
       analysisResult.categories = [...formData.categories]
     }
 
@@ -207,4 +225,12 @@ export default defineComponent({
     }
   }
 })
+
+function calculatePercentage (tagsOrExps: AnalyzeInfo[]) {
+  const totalCount = tagsOrExps.reduce((total, data) => total + data.count, 0)
+  return tagsOrExps.map(data => ({
+    ...data,
+    percentage: `${Math.round(data.count / totalCount * 100)}%`
+  }))
+}
 </script>

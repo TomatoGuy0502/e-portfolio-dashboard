@@ -1,3 +1,30 @@
 .checkbox-outline {
   @apply focus:ring-0 focus:ring-offset-0 focus-visible:ring-2 focus-visible:ring-red focus-visible:ring-offset-1;
 }
+
+@mixin scrollbars($size: 6px, $foreground-color: #C1C1C1, $background-color: mix($foreground-color, white,  50%)) {
+  // For Google Chrome
+  &::-webkit-scrollbar {
+    width:  $size;
+    height: $size;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $foreground-color;
+    border-radius: 10px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $background-color;
+  }
+  
+  // For Internet Explorer
+  & {
+    scrollbar-face-color: $foreground-color;
+    scrollbar-track-color: $background-color;
+  }
+}
+
+.custom-scrollbar {
+  @include scrollbars();
+}
