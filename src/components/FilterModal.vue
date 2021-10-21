@@ -26,7 +26,7 @@
             <li
               class="inline-block px-2 py-1 text-base rounded-full bg-gray-6 text-blue-dark list-complete-item"
               v-for="opts in selectedDepartments"
-              :key="opts"
+              :key="opts.value"
             >
               {{ opts.text }}
             </li>
@@ -34,24 +34,32 @@
         </div>
         <div class="h-[300px] border-t-[1px] border-b-[1px] border-gray-5 flex">
           <ul class="w-40">
-            <li class="flex items-center justify-between p-2 hover:bg-gray-5" :class="{'bg-gray-5': showingDegree === 'bachelor'}" @click="handleChangeDegree('bachelor')">
+            <li
+              class="flex items-center justify-between p-2 hover:bg-gray-5"
+              :class="{ 'bg-gray-5': showingDegree === 'bachelor' }"
+              @click="handleChangeDegree('bachelor')"
+            >
               <label for="college" class="flex items-center gap-2 py-1 cursor-pointer"
                 ><input
                   type="checkbox"
                   id="college"
                   class="border-2 rounded-[4px] border-gray-3 checkbox-outline text-red h-[18px] w-[18px]"
-                  @change="toggleAllColleges('bachelor', $event.target.checked)"
+                  @change="toggleAllColleges('bachelor', ($event.target as HTMLInputElement).checked)"
                 />大學</label
               >
               <ChevronRightIcon class="w-5 h-5" />
             </li>
-            <li class="flex items-center justify-between p-2 hover:bg-gray-5" :class="{'bg-gray-5': showingDegree === 'master'}" @click="handleChangeDegree('master')">
+            <li
+              class="flex items-center justify-between p-2 hover:bg-gray-5"
+              :class="{ 'bg-gray-5': showingDegree === 'master' }"
+              @click="handleChangeDegree('master')"
+            >
               <label for="master" class="flex items-center gap-2 py-1 cursor-pointer"
                 ><input
                   type="checkbox"
                   id="master"
                   class="border-2 rounded-[4px] border-gray-3 checkbox-outline text-red h-[18px] w-[18px]"
-                  @change="toggleAllColleges('master', $event.target.checked)"
+                  @change="toggleAllColleges('master', ($event.target as HTMLInputElement).checked)"
                 />碩士</label
               >
               <ChevronRightIcon class="w-5 h-5" />
@@ -63,13 +71,13 @@
                 class="flex items-center justify-between p-2 hover:bg-gray-5 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75"
                 as="div"
               >
-                <label :for="college" class="flex items-center gap-2 py-1 cursor-pointer" @click.stop
+                <label :for="college as string" class="flex items-center gap-2 py-1 cursor-pointer" @click.stop
                   ><input
                     type="checkbox"
-                    :id="college"
+                    :id="college as string"
                     :value="college"
                     v-model="selectedColleges[showingDegree]"
-                    @change="uncheckChildOptions(college)"
+                    @change="uncheckChildOptions(college as string)"
                     class="border-2 rounded-[4px] border-gray-3 checkbox-outline text-red h-[18px] w-[18px]"
                     :class="{
                       'text-gray-3 display-partial-checked':
@@ -128,37 +136,6 @@ import { computed, defineComponent, reactive, Ref, ref, watch } from 'vue'
 import { ChevronRightIcon, ChevronUpIcon } from '@heroicons/vue/outline'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 
-const collegesOfUniverity: Colleges = {
-  文學院: [
-    { text: '中文系', value: 'B1' },
-    { text: '外文系', value: 'B2' },
-    { text: '歷史系', value: 'B3' },
-    { text: '台文系', value: 'B5' }
-  ],
-  理學院: [
-    { text: '數學系', value: 'C1' },
-    { text: '物理系', value: 'C2' },
-    { text: '化學系', value: 'C3' },
-    { text: '地科系', value: 'C4' },
-    { text: '理學院學士班', value: 'CZ' },
-    { text: '光電系', value: 'F8' }
-  ],
-  管理學院: [],
-  工學院: [],
-  電機資訊學院: [],
-  社會科學學院: [],
-  規劃與設計學院: [],
-  生物科學與科技學院: [],
-  醫學院: [],
-  敏求智慧運算學院: []
-}
-const collegesOfGraduateSchool: Colleges = {
-  社會科學學院: [],
-  規劃與設計學院: [],
-  生物科學與科技學院: [],
-  醫學院: [],
-  敏求智慧運算學院: []
-}
 const collegesList = {
   bachelor: {
     文學院: [
@@ -192,7 +169,6 @@ const collegesList = {
     敏求智慧運算學院: []
   } as Colleges
 }
-
 type Degree = 'bachelor' | 'master'
 interface Colleges {
   [x: string]: FilterOption[]
@@ -220,7 +196,7 @@ export default defineComponent({
   emits: ['close', 'cofirm', 'update:colleges', 'update:departments'],
   setup (props, { emit }) {
     // ===== 顯示大學 / 碩士選項 =====
-    const showingDegree = ref('bachelor') as Ref<Degree>
+    const showingDegree = ref<Degree>('bachelor')
     const showingOptions = computed(() => {
       return collegesList[showingDegree.value]
     })
@@ -235,10 +211,10 @@ export default defineComponent({
     })
     const selectedDepartments = ref([]) as Ref<FilterOption[]>
 
-    watch(selectedColleges, (val) => {
+    watch(selectedColleges, val => {
       emit('update:colleges', val)
     })
-    watch(selectedDepartments, (val) => {
+    watch(selectedDepartments, val => {
       emit('update:departments', val)
     })
 
@@ -273,7 +249,7 @@ export default defineComponent({
         bachelor: {} as { [x: string]: { someChildrenAreChecked?: Boolean; collegeIsChecked?: Boolean } },
         master: {} as { [x: string]: { someChildrenAreChecked?: Boolean; collegeIsChecked?: Boolean } }
       }
-      ;['bachelor', 'master'].forEach((degree: Degree) => {
+      ;(['bachelor', 'master'] as Degree[]).forEach((degree: Degree) => {
         for (const college in collegesList[degree]) {
           obj[degree][college] = {}
           obj[degree][college].someChildrenAreChecked = selectedDepartments.value.some(opt => {
@@ -294,6 +270,15 @@ export default defineComponent({
       })
     }
 
+    const myOptionNow = ref<'a' | 'b'>('a')
+    const myOptions = reactive({
+      a: { foo: '123' },
+      b: { bar: '223' }
+    })
+    const myComputedOptions = computed(() => {
+      return myOptions[myOptionNow.value]
+    })
+
     return {
       showingDegree,
       showingOptions,
@@ -303,7 +288,8 @@ export default defineComponent({
       uncheckChildOptions,
       toggleAllColleges,
       collegesCheckedStatus,
-      cofirmChoice
+      cofirmChoice,
+      myComputedOptions
     }
   }
 })
