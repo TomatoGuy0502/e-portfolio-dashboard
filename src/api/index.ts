@@ -1,5 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig } from 'axios'
-import { storeToRefs } from 'pinia'
+import axios, { AxiosError } from 'axios'
 import { useAuthStore } from '@/stores/auth'
 
 const errorHandler = (error: Error | AxiosError) => {
@@ -20,7 +19,7 @@ const errorHandler = (error: Error | AxiosError) => {
 
 export const req = axios.create({
   baseURL:
-    process.env.NODE_ENV === 'production' ? process.env.VUE_APP_API_URL : 'https://api.e-portfolio.dev-box.site/api',
+    import.meta.env.PROD ? import.meta.env.VUE_APP_API_URL : 'https://api.e-portfolio.dev-box.site/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000
 })
