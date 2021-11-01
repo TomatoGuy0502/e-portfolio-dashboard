@@ -8,22 +8,22 @@ interface AnalyzeParam {
   }
   departments: string[]
   categories: ExperienceTypes[]
-  dateStart?: string
-  dateEnd?: string
+  yearStart: string
+  yearEnd: string
 }
 
 export const analyze = ({
   colleges,
   departments,
   categories,
-  dateStart = new Date().toISOString(),
-  dateEnd = new Date().toISOString()
+  yearStart,
+  yearEnd
 }: AnalyzeParam) => {
   return req.post('/backstage/analyze-categories', {
     colleges,
     departments,
     categories,
-    dateStart,
-    dateEnd
+    yearStart,
+    yearEnd
   })
 }

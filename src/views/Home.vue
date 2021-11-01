@@ -15,9 +15,13 @@
         </div>
       </div>
       <div class="mb-[42px]">
-        <label for="graduate" class="block mb-2 text-blue-dark">系級</label>
-        <select class="w-full bg-white border rounded-lg border-gray-5 " id="graduate">
-          <option v-for="semester in semesters" :key="semester">{{ semester }}</option>
+        <label for="semesterStart" class="block mb-2 text-blue-dark">系級<span class="ml-2 text-sm text-red-light">{{ formError.semester }}</span></label>
+        <select class="w-full bg-white border rounded-lg border-gray-5 " id="semesterStart" v-model="formData.yearStart" required>
+          <option v-for="semester in semesters" :key="semester" :value="semester">{{ semester }}</option>
+        </select>
+        <p class="my-1">到</p>
+        <select class="w-full bg-white border rounded-lg border-gray-5 " v-model="formData.yearEnd" required>
+          <option v-for="semester in semesterEndOptions" :key="semester" :value="semester">{{ semester }}</option>
         </select>
       </div>
       <div>
@@ -64,7 +68,7 @@
         </div>
         <div class="flex flex-col gap-y-[5px] text-base">
           <p>資料總數：{{ analysisResult.totalCount }}筆資料</p>
-          <p>入學時間：{{ analysisResult.enrollYear }}年</p>
+          <p>系級範圍：{{ analysisResult.yearStart }} - {{ analysisResult.yearEnd }}</p>
           <p>學習類別：{{ analysisResult.categories.map(category => experienceTypes[category]).join('、') }}</p>
         </div>
       </div>
@@ -92,7 +96,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed, watch } from 'vue'
+import { defineComponent, ref, reactive, computed, watch, watchEffect } from 'vue'
 import { DocumentDownloadIcon } from '@heroicons/vue/outline'
 import FilterModal from '@/components/FilterModal.vue'
 import { ExperienceTypes } from '@/types/index'
@@ -142,11 +146,14 @@ export default defineComponent({
         master: [] as string[]
       },
       departments: [] as { text: string; value: string }[],
-      categories: [] as ExperienceTypes[]
+      categories: [] as ExperienceTypes[],
+      yearStart: '110',
+      yearEnd: '110'
     })
     const formError = reactive({
       departments: null as null | String,
-      categories: null as null | String
+      categories: null as null | String,
+      semester: null as null | String
     })
 
     // ===== 更新系所資料 =====
@@ -170,10 +177,20 @@ export default defineComponent({
         formError.categories = categories.length ? null : '請至少選擇一個類別'
       }
     )
+    watch(
+      () => [formData.yearStart, formData.yearEnd],
+      ([yearStart, yearEnd]) => {
+        formError.semester = yearEnd >= yearStart ? null : '結束必須大於等於開始'
+      }
+    )
 
     // ===== 產生系級選項 =====
     const year = new Date().getFullYear() - 1911
     const semesters = [...Array(10).keys()].map((_, i) => `${year - i}`)
+    const semesterEndOptions = computed(() => {
+      const yearsToNow = year - ~~formData.yearStart + 1
+      return semesters.slice(0, yearsToNow)
+    })
 
     // ===== 表單送出 =====
     const analysisResult = reactive({
@@ -181,16 +198,11 @@ export default defineComponent({
       mostUsedTags: [] as AnalyzeInfoWithPercentage[],
       departments: [] as string[],
       totalCount: 0,
-      enrollYear: '110',
+      yearStart: '110',
+      yearEnd: '110',
       categories: [] as ExperienceTypes[]
     })
     const handleAnalyze = async () => {
-      if (!formData.colleges.bachelor.length && !formData.colleges.master.length && !formData.departments.length) {
-        formError.departments = '請至少選擇一個系所'
-      }
-      if (!formData.categories.length) {
-        formError.categories = '請至少選擇一個'
-      }
       if (formError.departments || formError.categories) return
 
       const { data }: { data: AnalyzeResponse } = await analyze({
@@ -219,6 +231,7 @@ export default defineComponent({
       handleUpdateDepartments,
       totalSelectedNumber,
       semesters,
+      semesterEndOptions,
       analysisResult,
       handleAnalyze,
       mostUsedTags
