@@ -9,13 +9,21 @@
     height: $size;
   }
   
-  &::-webkit-scrollbar-thumb {
+  &:hover::-webkit-scrollbar-thumb {
     background: $foreground-color;
+  }
+  
+  &:hover::-webkit-scrollbar-track {
+    background: $background-color;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
     border-radius: 10px;
   }
   
   &::-webkit-scrollbar-track {
-    background: $background-color;
+    background: transparent;
   }
   
   // For Internet Explorer

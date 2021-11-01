@@ -95,7 +95,7 @@
 import { defineComponent, ref, reactive, computed, watch } from 'vue'
 import { DocumentDownloadIcon } from '@heroicons/vue/outline'
 import FilterModal from '@/components/FilterModal.vue'
-import { ExperienceTypes } from '@/types/experience.type'
+import { ExperienceTypes } from '@/types/index'
 import { analyze } from '@/api/analyze'
 
 const experienceTypes = {

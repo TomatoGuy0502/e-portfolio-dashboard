@@ -24,7 +24,7 @@
           type="password"
           class="w-full border-gray-300 rounded-md shadow-sm text-gray-2 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           required
-          pattern="[a-zA-Z0-9]{8,}"
+          pattern="[a-zA-Z0-9#]{8,}"
           title="請輸入8位以上英數字"
         />
       </div>

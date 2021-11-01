@@ -1,5 +1,5 @@
 import { req } from './index'
-import { ExperienceTypes } from '@/types/experience.type'
+import { ExperienceTypes } from '@/types/index'
 
 interface AnalyzeParam {
   colleges: {

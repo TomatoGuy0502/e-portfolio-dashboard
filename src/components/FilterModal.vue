@@ -135,48 +135,8 @@
 import { computed, defineComponent, reactive, Ref, ref, watch } from 'vue'
 import { ChevronRightIcon, ChevronUpIcon } from '@heroicons/vue/outline'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
-
-const collegesList = {
-  bachelor: {
-    文學院: [
-      { text: '中文系', value: 'B1' },
-      { text: '外文系', value: 'B2' },
-      { text: '歷史系', value: 'B3' },
-      { text: '台文系', value: 'B5' }
-    ],
-    理學院: [
-      { text: '數學系', value: 'C1' },
-      { text: '物理系', value: 'C2' },
-      { text: '化學系', value: 'C3' },
-      { text: '地科系', value: 'C4' },
-      { text: '理學院學士班', value: 'CZ' },
-      { text: '光電系', value: 'F8' }
-    ],
-    管理學院: [],
-    工學院: [],
-    電機資訊學院: [],
-    社會科學學院: [],
-    規劃與設計學院: [],
-    生物科學與科技學院: [],
-    醫學院: [],
-    敏求智慧運算學院: []
-  } as Colleges,
-  master: {
-    社會科學學院: [],
-    規劃與設計學院: [],
-    生物科學與科技學院: [],
-    醫學院: [],
-    敏求智慧運算學院: []
-  } as Colleges
-}
-type Degree = 'bachelor' | 'master'
-interface Colleges {
-  [x: string]: FilterOption[]
-}
-interface FilterOption {
-  text: string
-  value: string
-}
+import { useCollegesList, FilterOption } from '@/composables/useCollegesList'
+import { Degree } from '@/types/index'
 
 export default defineComponent({
   name: 'FilterModal',
@@ -195,6 +155,8 @@ export default defineComponent({
   },
   emits: ['close', 'cofirm', 'update:colleges', 'update:departments'],
   setup (props, { emit }) {
+    const collegesList = useCollegesList()
+
     // ===== 顯示大學 / 碩士選項 =====
     const showingDegree = ref<Degree>('bachelor')
     const showingOptions = computed(() => {
