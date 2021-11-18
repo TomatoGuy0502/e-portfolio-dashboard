@@ -12,6 +12,16 @@ interface AnalyzeParam {
   yearEnd: string
 }
 
+interface AnalyzeInfo {
+  name: string
+  count: number
+}
+
+interface AnalyzeResponse {
+  experiences: AnalyzeInfo[],
+  tags: AnalyzeInfo[],
+}
+
 export const analyze = ({
   colleges,
   departments,
@@ -19,7 +29,7 @@ export const analyze = ({
   yearStart,
   yearEnd
 }: AnalyzeParam) => {
-  return req.post('/backstage/analyze-categories', {
+  return req.post<AnalyzeResponse>('/backstage/analyze-categories', {
     colleges,
     departments,
     categories,

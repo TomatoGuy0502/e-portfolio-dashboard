@@ -232,15 +232,6 @@ export default defineComponent({
       })
     }
 
-    const myOptionNow = ref<'a' | 'b'>('a')
-    const myOptions = reactive({
-      a: { foo: '123' },
-      b: { bar: '223' }
-    })
-    const myComputedOptions = computed(() => {
-      return myOptions[myOptionNow.value]
-    })
-
     return {
       showingDegree,
       showingOptions,
@@ -250,8 +241,7 @@ export default defineComponent({
       uncheckChildOptions,
       toggleAllColleges,
       collegesCheckedStatus,
-      cofirmChoice,
-      myComputedOptions
+      cofirmChoice
     }
   }
 })

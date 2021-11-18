@@ -15,7 +15,7 @@
         </div>
       </div>
       <div class="mb-[42px]">
-        <label for="semesterStart" class="block mb-2 text-blue-dark">系級<span class="ml-2 text-sm text-red-light">{{ formError.semester }}</span></label>
+        <label for="semesterStart" class="block mb-2 text-blue-dark">入學年份<span class="ml-2 text-sm text-red-light">{{ formError.semester }}</span></label>
         <select class="w-full bg-white border rounded-lg border-gray-5 " id="semesterStart" v-model="formData.yearStart" required>
           <option v-for="semester in semesters" :key="semester" :value="semester">{{ semester }}</option>
         </select>
@@ -68,7 +68,7 @@
         </div>
         <div class="flex flex-col gap-y-[5px] text-base">
           <p>資料總數：{{ analysisResult.totalCount }}筆資料</p>
-          <p>系級範圍：{{ analysisResult.yearStart }} - {{ analysisResult.yearEnd }}</p>
+          <p>年份範圍：{{ analysisResult.yearStart }} - {{ analysisResult.yearEnd }}</p>
           <p>學習類別：{{ analysisResult.categories.map(category => experienceTypes[category]).join('、') }}</p>
         </div>
       </div>
@@ -131,8 +131,6 @@ export default defineComponent({
     FilterModal
   },
   setup () {
-    const mostUsedTags = ref([])
-
     // ===== 儲存modal狀態 =====
     const showFilterModal = ref(false)
     const openFilterModal = () => {
@@ -168,21 +166,25 @@ export default defineComponent({
     })
 
     // ===== 更新錯誤訊息 =====
+    const checkCategoriesLength = () => {
+      formError.categories = formData.categories.length ? null : '請至少選擇一個類別'
+    }
+    const checkYear = () => {
+      formError.semester = formData.yearEnd >= formData.yearStart ? null : '結束必須大於等於開始'
+    }
+
     watch(totalSelectedNumber, val => {
       formError.departments = val ? null : '請至少選擇一個系所'
     })
     watch(
       () => formData.categories,
-      categories => {
-        formError.categories = categories.length ? null : '請至少選擇一個類別'
-      }
+      checkCategoriesLength
     )
     watch(
       () => [formData.yearStart, formData.yearEnd],
-      ([yearStart, yearEnd]) => {
-        formError.semester = yearEnd >= yearStart ? null : '結束必須大於等於開始'
-      }
+      checkYear
     )
+
 
     // ===== 產生系級選項 =====
     const year = new Date().getFullYear() - 1911
@@ -203,9 +205,11 @@ export default defineComponent({
       categories: [] as ExperienceTypes[]
     })
     const handleAnalyze = async () => {
+      checkCategoriesLength()
+      checkYear()
       if (formError.departments || formError.categories) return
 
-      const { data }: { data: AnalyzeResponse } = await analyze({
+      const { data } = await analyze({
         ...formData,
         departments: formData.departments.map(dept => dept.value)
       })
@@ -219,6 +223,8 @@ export default defineComponent({
         ...formData.departments.map(department => department.text)
       ]
       analysisResult.categories = [...formData.categories]
+      analysisResult.yearStart = formData.yearStart
+      analysisResult.yearEnd = formData.yearEnd
     }
 
     return {
@@ -233,8 +239,7 @@ export default defineComponent({
       semesters,
       semesterEndOptions,
       analysisResult,
-      handleAnalyze,
-      mostUsedTags
+      handleAnalyze
     }
   }
 })
